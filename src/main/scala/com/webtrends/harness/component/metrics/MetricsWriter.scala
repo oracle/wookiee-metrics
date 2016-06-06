@@ -19,10 +19,10 @@
 package com.webtrends.harness.component.metrics
 
 import com.codahale.metrics._
-import net.liftweb.json.JsonAST.render
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.json.ext.JodaTimeSerializers
+
 import scala.collection.JavaConversions._
 import scala.collection._
 import scala.collection.convert.Wrappers.JMapWrapper
@@ -57,7 +57,7 @@ class MetricsWriter {
     }.foldLeft(JObject(Nil))(_ ~ _) //.reduceLeft(_ ~ _)
   }
 
-  def getCustomMetrics(): JObject = {
+  def getCustomMetrics: JObject = {
     val t = SortedMap(MetricBuilder.registry.getMetrics.to: _*)
 
     if (t.isEmpty) {
@@ -78,7 +78,6 @@ class MetricsWriter {
     val Gau = classOf[Gauge[_]]
     val UGau = classOf[UpdatableGauge[_]]
     val Tim = classOf[Timer]
-    val Set = classOf[MetricSet]
 
     metric.getClass match {
       case Hist =>
@@ -141,51 +140,6 @@ class MetricsWriter {
       ("rate" -> writeMeteredFields(metric))
   }
 
-  private def tf(map: Map[String, Any]): JObject = {
-    val met = classOf[Metric]
-
-    map.groupBy(g => g._1.split("\\.")(0)).map { w =>
-      val key = w._1
-      w._2.map { i =>
-        val obj = i._2 match {
-          case m if met.isAssignableFrom(i._2.getClass) =>
-            if (i._1.contains(key.concat("."))) {
-              val k = i._1.replace(key.concat("."), "")
-              //val subMap = i._2.asInstanceOf[Map[String,Any]]
-              //if (met.isAssignableFrom(i._2.getClass)) {
-              //(key -> subMap.map { s => k -> processMetric(subMap.values.last.asInstanceOf[Metric])})//.reduceLeft(_ ~ _))
-              //JField(key, JField(k, processMetric(subMap.values.last.asInstanceOf[Metric])))
-              //(key -> processMetric(subMap.values.last.asInstanceOf[Metric])
-              //k -> processMetric(subMap.values.last.asInstanceOf[Metric])
-              //)
-              if (met.isAssignableFrom(i._2.getClass) && !k.contains(".")) {
-                //k -> processMetric(m.asInstanceOf[Metric])
-                //val sm = Map(k -> i._2.asInstanceOf[Metric])
-                //val zz = x(key, k, i._2.asInstanceOf[Metric])
-                //(key -> sm.map {s => x(s._1, s._2)})
-                //val yy = key -> processMetric(m.asInstanceOf[Metric])
-                //val ff = (key -> (k -> processMetric(m.asInstanceOf[Metric])))
-                //key -> processMetric(m.asInstanceOf[Metric])
-                key -> tf(Map(k -> i._2.asInstanceOf[Metric]))
-              }
-              else {
-                key -> tf(Map(k -> i._2))
-              }
-            }
-            else {
-              key -> processMetric(m.asInstanceOf[Metric])
-            }
-          case _ =>
-            val b = i._2.asInstanceOf[Map[String, Any]].map { s =>
-              s._1.replace(key.concat("."), "") -> s._2
-            }
-            (key -> tf(b))
-        }
-        obj
-      }.foldLeft(JObject(Nil))(_ ~ _)
-    }.reduceLeft(_ ~ _)
-  }
-
   private def evaluateGauge(gauge: com.codahale.metrics.Gauge[_]): JValue = {
     try {
       matchAny(gauge.getValue)
@@ -200,14 +154,7 @@ class MetricsWriter {
 
     ("min" -> snapshot.getMin) ~
       ("max" -> snapshot.getMax) ~
-      ("mean" -> snapshot.getMean) ~
-      ("median" -> snapshot.getMedian) ~
-      ("std_dev" -> snapshot.getStdDev) ~
-      ("p75" -> snapshot.get75thPercentile) ~
-      ("p95" -> snapshot.get95thPercentile) ~
-      ("p98" -> snapshot.get98thPercentile) ~
-      ("p99" -> snapshot.get99thPercentile) ~
-      ("p999" -> snapshot.get999thPercentile)
+      ("mean" -> snapshot.getMean)
   }
 
   private def writeMeteredFields(metric: Metered): JObject = {
@@ -217,13 +164,6 @@ class MetricsWriter {
       ("m1" -> metric.getOneMinuteRate) ~
       ("m5" -> metric.getFiveMinuteRate) ~
       ("m15", metric.getFifteenMinuteRate)
-  }
-
-  private def checkNan(num: AnyVal): JValue = {
-    num match {
-      case Double.NaN => "Nan"
-      case _ => matchAny(num)
-    }
   }
 
   private def matchAny(num: Any): JValue = {
