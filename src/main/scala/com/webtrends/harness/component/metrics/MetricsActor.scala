@@ -90,14 +90,14 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
     if (settings.GraphiteEnabled) {
       graphiteReporter = Some(GraphiteReporter.forRegistry(MetricBuilder())
         .prefixedWith("%s.%s.%s".format(settings.MetricPrefix,
-        InetAddress.getLocalHost.getHostName.split("\\.")(0),
+        InetAddress.getLocalHost.getHostName.replace('.', '_'),
         settings.ApplicationName.replace(' ', '_').toLowerCase))
         .build(new Graphite(new InetSocketAddress(settings.GraphiteHost,
         settings.GraphitePort))))
 
       jvmGraphiteReporter = Some(GraphiteReporter.forRegistry(MetricBuilder.jvmRegistry)
         .prefixedWith("%s.%s.%s.jvm".format(settings.MetricPrefix,
-        InetAddress.getLocalHost.getHostName.split("\\.")(0),
+        InetAddress.getLocalHost.getHostName.replace('.', '_'),
         settings.ApplicationName.replace(' ', '_').toLowerCase))
         .build(new Graphite(new InetSocketAddress(settings.GraphiteHost,
         settings.GraphitePort))))
