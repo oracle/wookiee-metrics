@@ -47,10 +47,12 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
            }
         """))) {
 
-  val probe = new TestProbe(system)
-  val actor = TestActorRef[MetricsActor] (MetricsActor.props(MonitoringSettings(system.settings.config.getConfig("wookiee-metrics"))))
+  sequential
 
   "Metrics" should {
+    val probe = new TestProbe(system)
+    val actor = TestActorRef[MetricsActor](MetricsActor.props(MonitoringSettings(system.settings.config.getConfig("wookiee-metrics"))))
+
     "be able to start properly" in {
       MetricBuilder.registry must not be equalTo(null)
       MetricBuilder.jvmRegistry must not be equalTo(null)
