@@ -15,3 +15,24 @@ The metrics component allows users to track metrics for functionality on their s
 * Meter - Marks the occurrence of an event
 
 For a working example of how this would work see [Wookiee - Metrics Example](example-metrics)
+
+### Adding to Pom
+
+Add the jfrog repo to your project first:
+~~~~
+<repositories>
+    <repository>
+        <id>JFrog</id>
+        <url>http://oss.jfrog.org/oss-release-local</url>
+    </repository>
+</repositories>
+~~~~
+
+Add [latest version](https://github.com/oracle/wookiee-metrics/releases/latest) of wookiee:
+~~~~
+<dependency>
+    <groupId>com.webtrends</groupId>
+    <artifactId>wookiee-metrics</artifactId>
+    <version>${wookiee.version}</version>
+</dependency>
+~~~~
