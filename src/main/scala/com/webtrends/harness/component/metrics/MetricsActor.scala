@@ -30,7 +30,7 @@ import com.webtrends.harness.component.metrics.messages._
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
 import com.webtrends.harness.health.{ComponentState, HealthComponent, ActorHealth}
 import com.webtrends.harness.logging.ActorLoggingAdapter
-import net.liftweb.json._
+import org.json4s.jackson.JsonMethods._
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -114,7 +114,7 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
       jmxReporter.get.start
     }
 
-    log.info("Metrics manager started: {}", context.self.path)
+    log.info("Metrics Manager started: {}", context.self.path)
   }
 
   override def postStop() = {
@@ -150,7 +150,7 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
 
     MetricBuilder.registry.removeMatching(MetricFilter.ALL)
     MetricBuilder.jvmRegistry.removeMatching(MetricFilter.ALL)
-    log.info("Metrics manager stopped: {}", context.self.path)
+    log.info("Metrics Manager stopped: {}", context.self.path)
   }
 
   /**
@@ -165,14 +165,11 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
   override protected def getHealth: Future[HealthComponent] = {
     Future {
       Try({
-        log.debug("MetricsActor health requested")
-        settings.GraphiteEnabled match {
-          case true =>
-            HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently sending metrics to graphite at %s:%d"
-              .format(settings.GraphiteHost, settings.GraphitePort))
-          case false =>
-            HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently not sending metrics to graphite")
-        }
+        log.trace("MetricsActor health requested")
+        if (settings.GraphiteEnabled) {
+          HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently sending metrics to graphite at %s:%d"
+            .format(settings.GraphiteHost, settings.GraphitePort))
+        } else HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently not sending metrics to graphite")
       }).recover({
         case e: Exception => HealthComponent(Metrics.MetricsName, ComponentState.CRITICAL, "An error occurred checking the metrics health: ".concat(e.getMessage))
       }).get

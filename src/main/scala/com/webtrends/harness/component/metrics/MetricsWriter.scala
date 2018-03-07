@@ -19,17 +19,17 @@
 package com.webtrends.harness.component.metrics
 
 import com.codahale.metrics._
-import net.liftweb.json.JsonDSL._
-import net.liftweb.json._
-import net.liftweb.json.ext.JodaTimeSerializers
+import org.json4s.JsonAST.{JObject, JValue}
+import org.json4s.ext.JodaTimeSerializers
+import org.json4s.{DefaultFormats, DoubleMode, JsonAST, JsonDSL}
 
 import scala.collection.JavaConversions._
 import scala.collection._
 import scala.collection.convert.Wrappers.JMapWrapper
 
-class MetricsWriter {
+class MetricsWriter extends JsonDSL with DoubleMode {
 
-  implicit val formats = net.liftweb.json.DefaultFormats ++ JodaTimeSerializers.all
+  implicit val formats = DefaultFormats ++ JodaTimeSerializers.all
 
   def getMetrics(includeJvm: Boolean): JValue = {
     "system" ->
@@ -178,7 +178,7 @@ class MetricsWriter {
         case f: Float => float2jvalue(f)
         case d: Double => bigdecimal2jvalue(d)
         case st: String => string2jvalue(st)
-        case r: AnyRef => JsonAST.JNull
+        case _: AnyRef => JsonAST.JNull
       }
     } catch {
       case e: Throwable =>
