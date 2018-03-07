@@ -19,14 +19,17 @@
 package com.webtrends.harness.component.metrics
 
 import akka.actor.ActorSystem
-import akka.testkit.{TestKit, TestActorRef, TestProbe}
+import akka.testkit.{TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
 import com.webtrends.harness.component.TestKitSpecificationWithJUnit
+import com.webtrends.harness.component.messages.StatusRequest
 import com.webtrends.harness.component.metrics.messages.CounterObservation
 import com.webtrends.harness.component.metrics.metrictype.Counter
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
 import com.webtrends.harness.health.HealthComponent
 import com.webtrends.harness.service.messages.CheckHealth
+import org.json4s.JsonAST.JValue
+import org.json4s.jackson.JsonMethods._
 
 class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test", ConfigFactory.parseString( """
           wookiee-metrics {
@@ -56,8 +59,8 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
     "be able to start properly" in {
       MetricBuilder.registry must not be equalTo(null)
       MetricBuilder.jvmRegistry must not be equalTo(null)
-      actor.underlyingActor.graphiteReporter must be equalTo (None)
-      actor.underlyingActor.jvmGraphiteReporter must be equalTo (None)
+      actor.underlyingActor.graphiteReporter must be equalTo None
+      actor.underlyingActor.jvmGraphiteReporter must be equalTo None
     }
 
     "be able to return it's health" in {
@@ -79,6 +82,14 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
 
       MetricBuilder.remove(met) must beTrue
       MetricBuilder.registry.getCounters.containsKey(met.name) must beFalse
+    }
+
+    "return json metrics" in {
+      probe.send(actor, StatusRequest("json"))
+      val result = probe.expectMsgClass(classOf[JValue])
+
+      val groups = compact(render(result \ "system" \ "metrics" \ "group.subgroup.count"))
+      groups mustEqual "1"
     }
   }
 
