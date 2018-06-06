@@ -38,6 +38,7 @@ class MetricsWriter extends JsonDSL with DoubleMode {
   }
 
   def getVmMetrics: JObject = {
+    val x = MetricBuilder.jvmRegistry.getMetrics
     val t = SortedMap(MetricBuilder.jvmRegistry.getMetrics.to: _*).groupBy {
       // Grab the actual type
       _._2.getClass.getName.replace("com.codahale.metrics.jvm.", "").replace("com.codahale.metrics.", "").split("\\$")(0) match {
