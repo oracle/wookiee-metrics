@@ -86,7 +86,7 @@ case class Timer(val name: String) extends Metric with MetricsAdapter {
    * @param time
    * @param unit the time unit, defaults to nanoseconds
    */
-  def record(time: Long, unit: TimeUnit = TimeUnit.NANOSECONDS): Unit = record(TimerObservation(this, time))
+  def record(time: Long, unit: TimeUnit = TimeUnit.NANOSECONDS): Unit = record(TimerObservation(this, time, unit))
 }
 
 object Metric {

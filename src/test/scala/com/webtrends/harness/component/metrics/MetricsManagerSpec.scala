@@ -30,6 +30,7 @@ import com.webtrends.harness.health.HealthComponent
 import com.webtrends.harness.service.messages.CheckHealth
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
+import scala.collection.JavaConverters._
 
 class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test", ConfigFactory.parseString( """
           wookiee-metrics {
@@ -90,6 +91,11 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
 
       val groups = compact(render(result \ "system" \ "metrics" \ "group.subgroup.count"))
       groups mustEqual "1"
+    }
+
+    "rename jvm time gauge" in {
+      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".time")).size == 0 must beTrue
+      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".gctime")).size > 0 must beTrue
     }
   }
 

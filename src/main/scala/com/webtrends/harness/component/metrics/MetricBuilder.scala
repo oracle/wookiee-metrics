@@ -100,11 +100,24 @@ object MetricBuilder {
 
   def registerJvmMetrics = {
 
+    val gcset = new GarbageCollectorMetricSet()
+    jvmRegistry.register("gc", gcset)
+
+    //Rename gc.time metrics to avoid issues with InfluxDB using time as a reserved word
+    val gaugeIter = jvmRegistry.getGauges.iterator
+    while (gaugeIter.hasNext) {
+      val (oldName, gauge) = gaugeIter.next()
+      val timeIndex = oldName.lastIndexOf(".time")
+      if (timeIndex > 0) {
+        val newName = s"${oldName.substring(0, timeIndex)}.gctime"
+        jvmRegistry.remove(oldName)
+        jvmRegistry.register(s"${newName}", gauge)
+      }
+    }
+
     val srv = ManagementFactory.getPlatformMBeanServer()
     val poolset = new BufferPoolMetricSet(srv)
     jvmRegistry.register("buffer-pool", poolset)
-    val gcset = new GarbageCollectorMetricSet()
-    jvmRegistry.register("gc", gcset)
     val musage = new MemoryUsageGaugeSet()
     jvmRegistry.register("memory", musage)
     val ts = new ThreadStatesGaugeSet()

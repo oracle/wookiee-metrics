@@ -23,7 +23,8 @@ import java.net.{InetSocketAddress, InetAddress}
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Props, Actor}
-import com.codahale.metrics.{MetricFilter, ScheduledReporter, JmxReporter}
+import com.codahale.metrics.{MetricFilter, ScheduledReporter}
+import com.codahale.metrics.jmx.JmxReporter
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
 import com.webtrends.harness.component.messages.{GetMetric, StatusRequest}
 import com.webtrends.harness.component.metrics.messages._
