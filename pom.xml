@@ -138,6 +138,10 @@
         </profile>
     </profiles>
 
+    <modules>
+        <module>child-pom.xml</module>
+    </modules>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
