@@ -6,7 +6,7 @@ import com.webtrends.harness.component.metrics.messages.TimerObservation
 import com.webtrends.harness.component.metrics.metrictype.Timer
 import com.webtrends.harness.logging.LoggingAdapter
 
-object TimerStopWatch {
+object TimerStopwatch {
   def apply(name: String, startOnCreate: Boolean = true) = new TimerStopwatch(name, startOnCreate)
 }
 
