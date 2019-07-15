@@ -64,10 +64,8 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
       actor.underlyingActor.jvmGraphiteReporter must be equalTo None
     }
 
-    "be able to return it's health" in {
-      probe.send(actor, CheckHealth)
-      val msg = probe.expectMsgClass(classOf[HealthComponent])
-      msg.name must be equalTo "metrics"
+    "have a health" in {
+      MetricsActor.health.name must be equalTo "metrics"
     }
 
     "be able to receive a metric observation and record it" in {
