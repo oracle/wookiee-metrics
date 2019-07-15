@@ -18,9 +18,13 @@
  */
 package com.webtrends.harness.component.metrics
 
+import akka.actor.ActorRef
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
 import com.webtrends.harness.utils.ConfigUtil
 import com.webtrends.harness.component.Component
+import com.webtrends.harness.health.{ComponentState, HealthComponent}
+
+import scala.concurrent.Future
 
 class MetricsManager(name:String) extends Component(name) with Metrics {
   implicit val monitorSettings = MonitoringSettings(ConfigUtil.prepareSubConfig(config, name))
@@ -33,6 +37,14 @@ class MetricsManager(name:String) extends Component(name) with Metrics {
   override def start = {
     startMetrics
     super.start
+  }
+
+  override protected def getHealthChildren: Iterable[ActorRef] = List()
+
+  override protected def getHealth: Future[HealthComponent] = {
+    Future.successful {
+      HealthComponent(MetricsManager.ComponentName, ComponentState.NORMAL, "Wookiee Metrics Up", None, List(MetricsActor.health))
+    }
   }
 }
 

@@ -19,21 +19,20 @@
 
 package com.webtrends.harness.component.metrics
 
-import java.net.{InetSocketAddress, InetAddress}
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Props, Actor}
-import com.codahale.metrics.{MetricFilter, ScheduledReporter}
-import com.codahale.metrics.jmx.JmxReporter
+import akka.actor.{Actor, Props}
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
+import com.codahale.metrics.jmx.JmxReporter
+import com.codahale.metrics.{MetricFilter, ScheduledReporter}
 import com.webtrends.harness.component.messages.{GetMetric, StatusRequest}
 import com.webtrends.harness.component.metrics.messages._
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
-import com.webtrends.harness.health.{ComponentState, HealthComponent, ActorHealth}
+import com.webtrends.harness.health.{ActorHealth, ComponentState, HealthComponent}
 import com.webtrends.harness.logging.ActorLoggingAdapter
 import org.json4s.jackson.JsonMethods._
 
-import scala.concurrent.Future
 import scala.util.Try
 
 /**
@@ -41,10 +40,11 @@ import scala.util.Try
  */
 object MetricsActor {
   def props(settings:MonitoringSettings): Props = Props(classOf[MetricsActor], settings)
+
+  var health: HealthComponent = HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Metrics not started yet.")
 }
 
 class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingAdapter with ActorHealth {
-  import context.dispatcher
 
   private[metrics] var jmxReporter: Option[JmxReporter] = None
   private[metrics] var graphiteReporter: Option[GraphiteReporter] = None
@@ -115,6 +115,7 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
       jmxReporter.get.start
     }
 
+    setHealth()
     log.info("Metrics Manager started: {}", context.self.path)
   }
 
@@ -154,26 +155,14 @@ class MetricsActor(settings:MonitoringSettings) extends Actor with ActorLoggingA
     log.info("Metrics Manager stopped: {}", context.self.path)
   }
 
-  /**
-   * This is the health of the current object, by default will be NORMAL
-   * In general this should be overridden to define the health of the current object
-   * For objects that simply manage other objects you shouldn't need to do anything
-   * else, as the health of the children components would be handled by their own
-   * CheckHealth function
-   *
-   * @return
-   */
-  override protected def getHealth: Future[HealthComponent] = {
-    Future {
-      Try({
-        log.trace("MetricsActor health requested")
-        if (settings.GraphiteEnabled) {
-          HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently sending metrics to graphite at %s:%d"
-            .format(settings.GraphiteHost, settings.GraphitePort))
-        } else HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently not sending metrics to graphite")
-      }).recover({
-        case e: Exception => HealthComponent(Metrics.MetricsName, ComponentState.CRITICAL, "An error occurred checking the metrics health: ".concat(e.getMessage))
-      }).get
-    }
+  protected def setHealth(): Unit = {
+    MetricsActor.health = Try({
+      if (settings.GraphiteEnabled) {
+        HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently sending metrics to graphite at %s:%d"
+          .format(settings.GraphiteHost, settings.GraphitePort))
+      } else HealthComponent(Metrics.MetricsName, ComponentState.NORMAL, "Currently not sending metrics to graphite")
+    }).recover({
+      case e: Exception => HealthComponent(Metrics.MetricsName, ComponentState.CRITICAL, "An error occurred checking the metrics health: ".concat(e.getMessage))
+    }).get
   }
 }
