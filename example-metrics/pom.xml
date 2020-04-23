@@ -12,7 +12,9 @@
         <build>1.0-SNAPSHOT</build>
         <build-artifact-name>${project.name}-${project.version}.${build}</build-artifact-name>
         <platform.version>1.0-SNAPSHOT</platform.version>
-        <wookiee.core.version>1.1.13</wookiee.core.version>
+        <wookiee.core.version>2.0-SNAPSHOT</wookiee.core.version>
+        <scala.artifact.version>2.12</scala.artifact.version>
+        <scala.version>2.12.10</scala.version>
     </properties>
 
     <dependencies>
@@ -20,22 +22,33 @@
             <groupId>com.webtrends</groupId>
             <artifactId>wookiee-core</artifactId>
             <version>${wookiee.core.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/wookiee-core_2.12-2.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.webtrends</groupId>
             <artifactId>wookiee-test</artifactId>
             <version>${wookiee.core.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/wookiee-test_2.12-2.0-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.webtrends</groupId>
-            <artifactId>wookiee-metrics</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>wookiee-metrics_${scala.artifact.version}</artifactId>
+            <version>2.6-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/wookiee-metrics_2.12-2.6-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.specs2</groupId>
-            <artifactId>specs2-junit_2.12</artifactId>
-            <version>2.4.15</version>
+            <artifactId>specs2-junit_${scala.artifact.version}</artifactId>
+            <version>3.9.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${scala.artifact.version}</artifactId>
+            <version>2.5.23</version>
         </dependency>
     </dependencies>
 
