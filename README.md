@@ -32,7 +32,7 @@ Add [latest version](https://github.com/oracle/wookiee-metrics/releases/latest) 
 ~~~~
 <dependency>
     <groupId>com.webtrends</groupId>
-    <artifactId>wookiee-metrics_2.11</artifactId>
+    <artifactId>wookiee-metrics_2.12</artifactId>
     <version>${wookiee.version}</version>
 </dependency>
 ~~~~

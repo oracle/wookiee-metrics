@@ -14,7 +14,7 @@
         <build>${build.number}</build>
         <build-artifact-name>${project.artifactId}-${project.version}</build-artifact-name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dropwizard.version>4.0.2</dropwizard.version>
+        <dropwizard.version>4.1.2</dropwizard.version>
         <scoverage.plugin.version>1.3.0</scoverage.plugin.version>
         <wookiee.core.version>2.0-SNAPSHOT</wookiee.core.version>
         <scala.version>2.12.10</scala.version>
@@ -184,12 +184,12 @@
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.artifact.version}</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest-maven-plugin</artifactId>
-            <version>1.0-M2</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 
@@ -226,7 +226,7 @@
             <plugin>
                 <groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
                 <artifactId>sbt-compiler-maven-plugin</artifactId>
-                <version>1.0.0-beta5</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <id>default-sbt-compile</id>

@@ -12,30 +12,31 @@
         <build>1.0-SNAPSHOT</build>
         <build-artifact-name>${project.name}-${project.version}.${build}</build-artifact-name>
         <platform.version>1.0-SNAPSHOT</platform.version>
-        <wookiee.core.version>1.1.13</wookiee.core.version>
+        <wookiee.core.version>2.0-SNAPSHOT</wookiee.core.version>
+        <scala.artifact.version>2.12</scala.artifact.version>
+        <scala.version>2.12.10</scala.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.webtrends</groupId>
-            <artifactId>wookiee-core</artifactId>
+            <artifactId>wookiee-core_${scala.artifact.version}</artifactId>
             <version>${wookiee.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.webtrends</groupId>
-            <artifactId>wookiee-test</artifactId>
+            <artifactId>wookiee-test_${scala.artifact.version}</artifactId>
             <version>${wookiee.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.webtrends</groupId>
-            <artifactId>wookiee-metrics</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>wookiee-metrics_${scala.artifact.version}</artifactId>
+            <version>3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-junit_2.11</artifactId>
-            <version>2.4.15</version>
-            <scope>test</scope>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${scala.artifact.version}</artifactId>
+            <version>2.6.5</version>
         </dependency>
     </dependencies>
 
@@ -77,27 +78,6 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.mmakowski</groupId>
-                <artifactId>maven-specs2-plugin</artifactId>
-                <version>0.4.1</version>
-                <executions>
-                    <execution>
-                        <id>test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>run-specs</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.pegdown</groupId>
-                        <artifactId>pegdown</artifactId>
-                        <version>1.2.1</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
