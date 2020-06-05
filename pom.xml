@@ -167,13 +167,13 @@
         </dependency>
         <dependency>
             <groupId>org.specs2</groupId>
-            <artifactId>specs2-junit_2.12</artifactId>
+            <artifactId>specs2-junit_${scala.artifact.version}</artifactId>
             <version>3.9.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.specs2</groupId>
-            <artifactId>specs2-core_2.12</artifactId>
+            <artifactId>specs2-core_${scala.artifact.version}</artifactId>
             <version>3.9.2</version>
             <scope>test</scope>
         </dependency>
