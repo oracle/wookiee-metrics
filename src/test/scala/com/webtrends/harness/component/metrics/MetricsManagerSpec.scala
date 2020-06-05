@@ -21,18 +21,18 @@ package com.webtrends.harness.component.metrics
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
-import com.webtrends.harness.component.TestKitSpecificationWithJUnit
 import com.webtrends.harness.component.messages.StatusRequest
 import com.webtrends.harness.component.metrics.messages.CounterObservation
 import com.webtrends.harness.component.metrics.metrictype.Counter
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
-import com.webtrends.harness.health.HealthComponent
-import com.webtrends.harness.service.messages.CheckHealth
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
+
 import scala.collection.JavaConverters._
 
-class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test", ConfigFactory.parseString( """
+class MetricsManagerSpec extends TestKit(ActorSystem("test", ConfigFactory.parseString( """
           wookiee-metrics {
              application-name = "Webtrends Harness"
              metric-prefix = workstations
@@ -49,38 +49,36 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
                regex=""
              }
            }
-        """))) {
-
-  sequential
+        """))) with WordSpecLike with Matchers with BeforeAndAfterAll {
 
   "Metrics" should {
     val probe = new TestProbe(system)
     val actor = TestActorRef[MetricsActor](MetricsActor.props(MonitoringSettings(system.settings.config.getConfig("wookiee-metrics"))))
 
     "be able to start properly" in {
-      MetricBuilder.registry must not be equalTo(null)
-      MetricBuilder.jvmRegistry must not be equalTo(null)
-      actor.underlyingActor.graphiteReporter must be equalTo None
-      actor.underlyingActor.jvmGraphiteReporter must be equalTo None
+      MetricBuilder.registry must not be null
+      MetricBuilder.jvmRegistry must not be null
+      actor.underlyingActor.graphiteReporter mustBe None
+      actor.underlyingActor.jvmGraphiteReporter mustBe None
     }
 
     "have a health" in {
-      MetricsActor.health.name must be equalTo "metrics"
+      MetricsActor.health.name mustBe "metrics"
     }
 
     "be able to receive a metric observation and record it" in {
       val met = Counter("group.subgroup.count")
       probe.send(actor, CounterObservation(met, 1))
-      MetricBuilder.registry.getCounters.containsKey(met.name) must beTrue
+      MetricBuilder.registry.getCounters.containsKey(met.name) mustBe true
     }
 
     "be able to receive a metric observation, record it, and then remove it" in {
       val met = Counter("group.subgroup.count2")
       probe.send(actor, CounterObservation(met, 1))
-      MetricBuilder.registry.getCounters.containsKey(met.name) must beTrue
+      MetricBuilder.registry.getCounters.containsKey(met.name) mustBe true
 
-      MetricBuilder.remove(met) must beTrue
-      MetricBuilder.registry.getCounters.containsKey(met.name) must beFalse
+      MetricBuilder.remove(met) mustBe true
+      MetricBuilder.registry.getCounters.containsKey(met.name) mustBe false
     }
 
     "return json metrics" in {
@@ -92,12 +90,12 @@ class MetricsManagerSpec extends TestKitSpecificationWithJUnit(ActorSystem("test
     }
 
     "rename jvm time gauge" in {
-      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".time")).size == 0 must beTrue
-      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".gctime")).size > 0 must beTrue
+      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".time")).size == 0 mustBe true
+      MetricBuilder.jvmRegistry.getGauges.keySet().asScala.filter(_.endsWith(".gctime")).size > 0 mustBe true
     }
   }
 
-  step {
+  override protected def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 }

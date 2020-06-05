@@ -21,15 +21,15 @@ package com.webtrends.harness.monitoring
 import com.typesafe.config.ConfigFactory
 import com.webtrends.harness.component.metrics.monitoring.MonitoringSettings
 import com.webtrends.harness.utils.ConfigUtil
-import org.specs2.mutable.SpecificationWithJUnit
+import org.scalatest.{Matchers, WordSpecLike}
 
-class MonitoringSettingsSpec extends SpecificationWithJUnit {
+class MonitoringSettingsSpec  extends WordSpecLike with Matchers {
 
   "MonitoringSettings" should {
     "load properly from the reference file reference.conf" in {
 
       val settings = MonitoringSettings(ConfigUtil.prepareSubConfig(ConfigFactory.load("reference.conf"), "wookiee-metrics"))
-      settings.ApplicationName must not beEmpty
+      settings.ApplicationName should not be ""
     }
 
     "load properly from parsing a configuration string" in {
@@ -52,7 +52,7 @@ class MonitoringSettingsSpec extends SpecificationWithJUnit {
          }
         """), "wookiee-metrics"))
 
-      settings.ApplicationName must not beEmpty
+      settings.ApplicationName should not be ""
 
     }
 
@@ -76,7 +76,7 @@ class MonitoringSettingsSpec extends SpecificationWithJUnit {
          }
          """), "wookiee-metrics")
 
-      MonitoringSettings(config) must throwA[IllegalArgumentException]
+      a[IllegalArgumentException] should be thrownBy MonitoringSettings(config)
     }
   }
 }

@@ -20,17 +20,16 @@ package com.webtrends.harness.component.metrics
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
-import com.webtrends.harness.component.TestKitSpecificationWithJUnit
 import com.webtrends.harness.component.metrics.messages._
 import com.webtrends.harness.component.metrics.metrictype._
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
-class MetricSpec extends TestKitSpecificationWithJUnit(ActorSystem("harness")) {
+class MetricSpec extends TestKit(ActorSystem("harness"))
+  with WordSpecLike with Matchers with BeforeAndAfterAll {
 
   val probe = new TestProbe(system)
   MetricsEventBus.subscribe(probe.ref)
-
-  // Run these tests sequentially so that the probe does not bump into the same events
-  sequential
 
   "metrics " should {
     "allow for counters" in {
@@ -38,42 +37,42 @@ class MetricSpec extends TestKitSpecificationWithJUnit(ActorSystem("harness")) {
       metric.incr
 
       val obs = CounterObservation(metric, 1)
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
 
       metric.incr(5)
       val obs2 = CounterObservation(metric, 5)
-      obs2 must be equalTo probe.expectMsg(obs2)
+      obs2 mustBe probe.expectMsg(obs2)
     }
 
     "allow for gauges" in {
       val metric = Gauge("group.subgroup.name.scope")
       metric.update(3.25F)
       val obs = GaugeObservation(metric, 3.25F)
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
     }
 
     "allow for histograms" in {
       val metric = Histogram("group.subgroup.name.scope")
       metric.update(15)
       val obs = HistogramObservation(metric, 15)
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
     }
 
     "allow for meters" in {
       val metric = Meter("group.subgroup.name.scope.event")
       metric.mark
       val obs = MeterObservation(metric, 1)
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
 
       metric.mark(5)
       val obs2 = MeterObservation(metric, 5)
-      obs2 must be equalTo probe.expectMsg(obs2)
+      obs2 mustBe probe.expectMsg(obs2)
 
       metric.meter() {
         val x = 1
       }
 
-      probe.expectMsgClass(classOf[MeterObservation]).isInstanceOf[MeterObservation] must beTrue
+      probe.expectMsgClass(classOf[MeterObservation]).isInstanceOf[MeterObservation] mustBe true
     }
 
     "allow for timers" in {
@@ -83,11 +82,11 @@ class MetricSpec extends TestKitSpecificationWithJUnit(ActorSystem("harness")) {
         val x = 1
       }
 
-      probe.expectMsgClass(classOf[TimerObservation]).isInstanceOf[TimerObservation] must beTrue
+      probe.expectMsgClass(classOf[TimerObservation]).isInstanceOf[TimerObservation] mustBe true
     }
   }
 
-  step {
+  override protected def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 }

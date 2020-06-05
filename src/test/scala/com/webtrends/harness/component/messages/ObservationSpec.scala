@@ -19,36 +19,38 @@
 package com.webtrends.harness.component.messages
 
 import java.util.concurrent.TimeUnit
+
 import com.webtrends.harness.component.metrics.messages._
 import com.webtrends.harness.component.metrics.metrictype._
-import org.specs2.mutable.SpecificationWithJUnit
+import org.scalatest.WordSpecLike
+import org.scalatest.matchers.must.Matchers
 
-class ObservationSpec extends SpecificationWithJUnit {
+class ObservationSpec extends WordSpecLike with Matchers {
 
   "metric observations " should {
     "allow for counters" in {
       val counter = CounterObservation(Counter("group.subgroup.name.scope"), 10)
-      counter.delta must beEqualTo(10)
+      counter.delta mustBe 10
     }
 
     "allow for gauges" in {
       val gauge = GaugeObservation(Gauge("group.subgroup.name.scope"), 10)
-      gauge.value must beEqualTo(10)
+      gauge.value mustBe 10
     }
 
     "allow for histograms" in {
       val histo = HistogramObservation(Histogram("group.subgroup.name.scope"), 10)
-      histo.value must beEqualTo(10)
+      histo.value mustBe 10
     }
 
     "allow for meters" in {
       val meter = MeterObservation(Meter("group.subgroup.name.scope"), 10)
-      meter.events must beEqualTo(10)
+      meter.events mustBe 10
     }
 
     "allow for timers" in {
       val timer = TimerObservation(Timer("group.subgroup.name.scope"), 10, TimeUnit.SECONDS)
-      timer.elapsed must beEqualTo(10)
+      timer.elapsed mustBe 10
     }
   }
 }

@@ -20,16 +20,15 @@ package com.webtrends.harness.component.metrics
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
-import com.webtrends.harness.component.TestKitSpecificationWithJUnit
-import com.webtrends.harness.component.metrics.messages.{MeterObservation, CounterObservation}
+import com.webtrends.harness.component.metrics.messages.{CounterObservation, MeterObservation}
 import com.webtrends.harness.component.metrics.metrictype.{Counter, Meter}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
-class MetricsEventBusSpec extends TestKitSpecificationWithJUnit(ActorSystem("harness")) {
+class MetricsEventBusSpec extends TestKit(ActorSystem("harness")) with WordSpecLike with Matchers with BeforeAndAfterAll {
 
-  val metric = Counter("group.subgroup.name.scope")
-  val meter = Meter("group.subgroup.name.scope")
-
-  sequential
+  val metric: Counter = Counter("group.subgroup.name.scope")
+  val meter: Meter = Meter("group.subgroup.name.scope")
 
   "The event bus should " should {
 
@@ -41,7 +40,7 @@ class MetricsEventBusSpec extends TestKitSpecificationWithJUnit(ActorSystem("har
       MetricsEventBus.publish(obs)
       MetricsEventBus.unsubscribe(probe.ref)
 
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
     }
 
     " allow actors to subscribe and then un-subscribe" in {
@@ -50,16 +49,16 @@ class MetricsEventBusSpec extends TestKitSpecificationWithJUnit(ActorSystem("har
 
       val obs = MeterObservation(meter, 1)
       MetricsEventBus.publish(obs)
-      obs must be equalTo probe.expectMsg(obs)
+      obs mustBe probe.expectMsg(obs)
 
       MetricsEventBus.unsubscribe(probe.ref)
       MetricsEventBus.publish(obs)
       probe.expectNoMsg()
-      success
+      succeed
     }
   }
 
-  step {
+  override protected def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 }
