@@ -25,7 +25,7 @@ import com.webtrends.harness.component.metrics.metrictype._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
-class MetricSpec extends TestKit(ActorSystem("harness"))
+class MetricSpec extends TestKit(ActorSystem("metricspec"))
   with WordSpecLike with Matchers with BeforeAndAfterAll {
 
   val probe = new TestProbe(system)
