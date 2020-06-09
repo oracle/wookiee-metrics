@@ -22,7 +22,7 @@ import com.codahale.metrics._
 import com.codahale.metrics.jvm._
 import com.webtrends.harness.component.metrics.messages._
 import java.lang.management.ManagementFactory
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object MetricBuilder {
 
@@ -46,7 +46,7 @@ object MetricBuilder {
   def apply(o: GaugeObservation): UpdatableGauge[Float] = {
     // See if this is already registered
     registry.getGauges(new MetricFilter { def matches(regName:String, metric:Metric): Boolean =
-      regName.equals(o.metric.name)}).values.headOption match {
+      regName.equals(o.metric.name)}).values.asScala.headOption match {
 
       case Some(m) =>
         m.asInstanceOf[UpdatableGauge[Float]]
@@ -63,7 +63,7 @@ object MetricBuilder {
    */
   def apply(o: HistogramObservation): Histogram = {
     registry.getHistograms(new MetricFilter { def matches(regName:String, metric:Metric): Boolean =
-      regName.equals(o.metric.name)}).values.headOption match {
+      regName.equals(o.metric.name)}).values.asScala.headOption match {
 
       case Some(m: Histogram) =>
         m
@@ -104,7 +104,7 @@ object MetricBuilder {
     jvmRegistry.register("gc", gcset)
 
     //Rename gc.time metrics to avoid issues with InfluxDB using time as a reserved word
-    val gaugeIter = jvmRegistry.getGauges.iterator
+    val gaugeIter = jvmRegistry.getGauges.asScala.iterator
     while (gaugeIter.hasNext) {
       val (oldName, gauge) = gaugeIter.next()
       val timeIndex = oldName.lastIndexOf(".time")

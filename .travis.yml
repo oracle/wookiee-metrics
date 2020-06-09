@@ -23,6 +23,8 @@ matrix:
   include:
     - scala: '2.12.11'
       env: SCALAVER=2.12
+    - scala: '2.13.1'
+      env: SCALAVER=2.13
 
 cache:
   directories:

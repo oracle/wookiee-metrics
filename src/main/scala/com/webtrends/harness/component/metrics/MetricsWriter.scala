@@ -21,15 +21,14 @@ package com.webtrends.harness.component.metrics
 import com.codahale.metrics._
 import org.json4s.JsonAST.{JObject, JValue}
 import org.json4s.ext.JodaTimeSerializers
-import org.json4s.{DefaultFormats, DoubleMode, JsonAST, JsonDSL}
+import org.json4s.{DefaultFormats, DoubleMode, Formats, JsonAST, JsonDSL}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection._
-import scala.collection.convert.Wrappers.JMapWrapper
 
 class MetricsWriter extends JsonDSL with DoubleMode {
 
-  implicit val formats = DefaultFormats ++ JodaTimeSerializers.all
+  implicit val formats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   def getMetrics(includeJvm: Boolean): JValue = {
     "system" ->
@@ -38,7 +37,7 @@ class MetricsWriter extends JsonDSL with DoubleMode {
   }
 
   def getVmMetrics: JObject = {
-    val t = SortedMap(MetricBuilder.jvmRegistry.getMetrics.to: _*).groupBy {
+    val t = SortedMap.from(MetricBuilder.jvmRegistry.getMetrics.asScala).groupBy {
       // Grab the actual type
       _._2.getClass.getName.replace("com.codahale.metrics.jvm.", "").replace("com.codahale.metrics.", "").split("\\$")(0) match {
         case "JmxAttributeGauge" => "buffers"
@@ -48,17 +47,16 @@ class MetricsWriter extends JsonDSL with DoubleMode {
       }
     }
 
-    //tf(SortedMap(JMapWrapper(t).to:_*))
-    SortedMap(JMapWrapper(t).to: _*).map { w =>
-      w._1 ->
-        w._2.map { s =>
-          s._1 -> processMetric(s._2)
+    SortedMap.from(t).map { case (w: String, mp: SortedMap[String, Metric]) =>
+      w ->
+        mp.map { case (s: String, m: Metric) =>
+          s -> processMetric(m)
         }.foldLeft(JObject(Nil))(_ ~ _)
-    }.foldLeft(JObject(Nil))(_ ~ _) //.reduceLeft(_ ~ _)
+    }.foldLeft(JObject(Nil))(_ ~ _)
   }
 
   def getCustomMetrics: JObject = {
-    val t = SortedMap(MetricBuilder.registry.getMetrics.to: _*)
+    val t = SortedMap.from(MetricBuilder.registry.getMetrics.asScala)
 
     if (t.isEmpty) {
       JObject(Nil)
