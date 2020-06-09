@@ -25,6 +25,7 @@ import org.json4s.{DefaultFormats, DoubleMode, Formats, JsonAST, JsonDSL}
 
 import scala.collection.JavaConverters._
 import scala.collection._
+import scala.collection.immutable.TreeMap
 
 class MetricsWriter extends JsonDSL with DoubleMode {
 
@@ -37,7 +38,7 @@ class MetricsWriter extends JsonDSL with DoubleMode {
   }
 
   def getVmMetrics: JObject = {
-    val t = SortedMap.from(MetricBuilder.jvmRegistry.getMetrics.asScala).groupBy {
+    val t = SortedMap(MetricBuilder.jvmRegistry.getMetrics.asScala.toList: _*).groupBy {
       // Grab the actual type
       _._2.getClass.getName.replace("com.codahale.metrics.jvm.", "").replace("com.codahale.metrics.", "").split("\\$")(0) match {
         case "JmxAttributeGauge" => "buffers"
@@ -47,7 +48,7 @@ class MetricsWriter extends JsonDSL with DoubleMode {
       }
     }
 
-    SortedMap.from(t).map { case (w: String, mp: SortedMap[String, Metric]) =>
+    t.map { case (w: String, mp: SortedMap[String, Metric]) =>
       w ->
         mp.map { case (s: String, m: Metric) =>
           s -> processMetric(m)
@@ -56,14 +57,13 @@ class MetricsWriter extends JsonDSL with DoubleMode {
   }
 
   def getCustomMetrics: JObject = {
-    val t = SortedMap.from(MetricBuilder.registry.getMetrics.asScala)
+    val t = SortedMap(MetricBuilder.registry.getMetrics.asScala.toList: _*)
 
     if (t.isEmpty) {
       JObject(Nil)
-    }
-    else {
-      t.map {
-        w => w._1 -> processMetric(w._2)
+    } else {
+      t.map { case (w: String, m: Metric) =>
+        w -> processMetric(m)
       }.foldLeft(JObject(Nil))(_ ~ _)
     }
   }
