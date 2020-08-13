@@ -27,6 +27,8 @@ class TimerStopwatch(val name: String, val startOnCreate: Boolean = true) extend
 
   def failure() = finish (Timer(s"${name}.failure"))
 
+  def failure(failureType: String) = finish (Timer(s"${name}.${failureType}.failure"))
+
   private def finish(timer: Timer): Unit = {
     startTime match {
       case Some(start) =>
