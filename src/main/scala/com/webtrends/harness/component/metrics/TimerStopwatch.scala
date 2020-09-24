@@ -6,8 +6,22 @@ import com.webtrends.harness.component.metrics.messages.TimerObservation
 import com.webtrends.harness.component.metrics.metrictype.Timer
 import com.webtrends.harness.logging.LoggingAdapter
 
+import scala.util.{Failure, Success, Try}
+
 object TimerStopwatch {
   def apply(name: String, startOnCreate: Boolean = true) = new TimerStopwatch(name, startOnCreate)
+
+  def tryWrapper[T](name: String)(toTry: => T): T = {
+    val timer = TimerStopwatch(name)
+    Try(toTry) match {
+      case Success(t) =>
+        timer.success()
+        t
+      case Failure(t) =>
+        timer.failure()
+        throw t
+    }
+  }
 }
 
 class TimerStopwatch(val name: String, val startOnCreate: Boolean = true) extends MetricsAdapter with LoggingAdapter {
