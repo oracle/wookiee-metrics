@@ -6,6 +6,7 @@ import com.webtrends.harness.component.metrics.messages.TimerObservation
 import com.webtrends.harness.component.metrics.metrictype.Timer
 import com.webtrends.harness.logging.LoggingAdapter
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 object TimerStopwatch {
@@ -21,6 +22,19 @@ object TimerStopwatch {
         timer.failure()
         throw t
     }
+  }
+
+  def futureWrapper[T](name: String)(toRun: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+    val timer = TimerStopwatch(name)
+    val evaluatedFuture = toRun
+    evaluatedFuture.onComplete {
+      case Success(_) =>
+        timer.success()
+      case Failure(_) =>
+        timer.failure()
+    }
+
+    evaluatedFuture
   }
 }
 
